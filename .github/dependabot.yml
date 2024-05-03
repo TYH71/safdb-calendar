@@ -11,11 +11,12 @@ updates:
     schedule:
       interval: weekly
   - package-ecosystem: pip
+    directory: "/"
     schedule:
-      interval: monthly
+      interval: "weekly"
+      day: "monday"
       time: "06:00"
       timezone: "Asia/Singapore"
     labels:
       - "dependencies"
       - "python"
-    open-pull-requests-limit: 5
