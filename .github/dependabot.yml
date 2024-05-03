@@ -10,3 +10,12 @@ updates:
     directory: "/"
     schedule:
       interval: weekly
+  - package-ecosystem: pip
+    schedule:
+      interval: monthly
+      time: "06:00"
+      timezone: "Asia/Singapore"
+    labels:
+      - "dependencies"
+      - "python"
+    open-pull-requests-limit: 5
