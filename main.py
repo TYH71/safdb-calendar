@@ -1,9 +1,10 @@
 import os
+import copy
 from dotenv import load_dotenv
 from datetime import date, timedelta
 from googleapiclient.discovery import build
-from google_auth_oauthlib.flow import InstalledAppFlow
-
+from src.credentials import get_credentials
+from src.logger import logger
 
 # loading variables from .env file
 load_dotenv()
@@ -11,50 +12,42 @@ load_dotenv()
 CALENDAR_ID = os.getenv("CALENDAR_ID")
 
 COLOR_MAP = {
-    "Dismount": "6",  # Green
-    "Standby": "10",  # Yellow
-    "Mount": "11",  # Red
+    "Dismount": "2",  # Sage, green
+    "Standby": "5",  # banana , yellow
+    "Mount": "4",  # flamingo /red
 }
 
 
-def get_credentials():
-    """Retrieves Google Calendar API credentials."""
-    scopes = ["https://www.googleapis.com/auth/calendar"]
-
-    # Replace with the path to your client secret file
-    client_secret_file = "client_secret.json"
-
-    flow = InstalledAppFlow.from_client_secrets_file(client_secret_file, scopes=scopes)
-    credentials = flow.run_local_server()
-    return credentials
-
-
-def insert_event(event_type):
+def insert_event(event_type, date_pointer, credentials):
     """Inserts an all-day event into Google Calendar."""
-    credentials = get_credentials()
-
     service = build("calendar", "v3", credentials=credentials)
-
     event = {
         "summary": event_type,
         "colorId": COLOR_MAP[event_type],
-        "start": {"date": (date.today() + timedelta(days=1)).strftime("%Y-%m-%d")},
-        "end": {"date": (date.today() + timedelta(days=2)).strftime("%Y-%m-%d")},
+        "start": {"date": date_pointer.strftime("%Y-%m-%d")},
+        "end": {"date": (date_pointer + timedelta(days=2)).strftime("%Y-%m-%d")},
         "allDay": True,
     }
-
     service.events().insert(calendarId=CALENDAR_ID, body=event).execute()
+    return
 
 
 def main():
-    """Inserts alternating Dismount, Standby, Mount events until the end of 2024."""
-    event_types = ["Dismount", "Standby", "Mount"]
-    start_date = date.today()
-
-    for event_type in event_types * ((date(2024, 12, 31) - start_date).days // 4 + 1):
-        if date.today() > date(2024, 12, 31):
+    credentials = get_credentials()
+    start_date = date(2024, 5, 1)
+    end_date = date(2025, 12, 31)
+    date_pointer = copy.deepcopy(start_date)
+    
+    event_type = ["Mount", "Dismount", "Standby"]
+    event_pointer = 0
+    while True:
+        if date_pointer > end_date:
             break
-        insert_event(event_type)
+        
+        logger.info(f"creating event: {date_pointer} {event_type[event_pointer % 3]}")
+        insert_event(event_type[event_pointer % 3], date_pointer, credentials)
+        event_pointer += 1
+        date_pointer = date_pointer + timedelta(days=2)
 
 
 if __name__ == "__main__":
