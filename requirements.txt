@@ -27,7 +27,7 @@ python-dotenv==1.0.1
 requests==2.32.3
 requests-oauthlib==2.0.0
 rsa==4.9
-ruff==0.5.5
+ruff==0.6.8
 setuptools==74.0.0
 smmap==5.0.1
 uritemplate==4.1.1
